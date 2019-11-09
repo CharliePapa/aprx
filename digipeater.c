@@ -1532,8 +1532,8 @@ void digipeater_receive( struct digipeater_source *src,
 	//  The dupe-filter exists for APRS frames, possibly for some
 	// selected UI frame types, and definitely not for CONS frames.
 
-	if (debug)
-		printf("digipeater_receive() from %s, is_aprs=%d viscous_delay=%d\n",
+//	if (debug)
+		aprxlog("digipeater_receive() from %s, is_aprs=%d viscous_delay=%d",
 				src->src_if->callsign, pb->is_aprs, src->viscous_delay);
 
 	if (src->tokenbucket < 1.0) {
@@ -1552,7 +1552,7 @@ void digipeater_receive( struct digipeater_source *src,
 		//    If the dupe detector on this packet has reached
 		//    count > 1, drop it.
 
-		int jittery = src->viscous_delay > 0 ? random() % 3 + src->viscous_delay : 0;
+		int jittery = src->viscous_delay > 0 ? random() % 1 + src->viscous_delay - 1 : 0;
 		dupe_record_t *dupe = dupecheck_pbuf( src->parent->dupechecker,
 				pb, jittery);
 		if (dupe == NULL) {  // Oops.. allocation error!
@@ -1617,8 +1617,8 @@ void digipeater_receive( struct digipeater_source *src,
 			if (dupe->seen > 0) {
 				// Already processed thru direct processing,
 				// no point in adding this to viscous delay queue
-				if (debug>1)
-					printf("Seen this packet %d times. Discarding it.\n",
+				// if (debug>1)
+					aprxlog("Seen this packet %d times. Discarding it.",
 							dupe->delayed_seen + dupe->seen);
 				return;
 			}
@@ -1631,8 +1631,8 @@ void digipeater_receive( struct digipeater_source *src,
 
 			if (dupe->delayed_seen > 1) {
 				// 2nd or more of same packet from delayed source
-				if (debug>1)
-					printf("Seen this packet %d times.\n",
+			// if (debug>1)
+					aprxlog("Seen this packet %d times.",
 							dupe->delayed_seen + dupe->seen);
 
 				// If any of them is transmitter interface, then
@@ -1665,7 +1665,8 @@ void digipeater_receive( struct digipeater_source *src,
 			src->viscous_queue[ src->viscous_queue_size -1 ]
 				= dupecheck_get(dupe);
 
-			if (debug) printf("%ld ENTER VISCOUS QUEUE: len=%d pbuf=%p\n",
+			// if (debug) 
+				aprxlog("%ld ENTER VISCOUS QUEUE: len=%d pbuf=%p",
 					tick.tv_sec, src->viscous_queue_size, pb);
 			return; // Put on viscous queue
 
@@ -1792,7 +1793,8 @@ int  digipeater_postpoll(struct aprxpolls *app)
 				struct dupe_record_t *dupe = src->viscous_queue[i];
 				time_t t = dupe->t + src->viscous_delay;
 				if ((t - tick.tv_sec) <= 0) {
-					if (debug)printf("%ld LEAVE VISCOUS QUEUE: dupe=%p pbuf=%p\n",
+					//if (debug)
+						aprxlog("%ld LEAVE VISCOUS QUEUE: dupe=%p pbuf=%p",
 							tick.tv_sec, dupe, dupe->pbuf);
 					if (dupe->pbuf != NULL) {
 						// We send the pbuf from viscous queue, if it still is
