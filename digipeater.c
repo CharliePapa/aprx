@@ -1293,7 +1293,8 @@ static void digipeater_receive_backend(struct digipeater_source *src, struct pbu
 		}
 	}
 
-	// if (debug) printf(" Packet accepted to digipeat!\n");
+	// if (debug) 
+	aprxlog(" Packet accepted to digipeat!");
 
 	state.ax25addrlen = pb->ax25addrlen;
 	memcpy(state.ax25addr, pb->ax25addr, pb->ax25addrlen);
@@ -1451,12 +1452,12 @@ static void digipeater_receive_backend(struct digipeater_source *src, struct pbu
 				& frameaddrlen, &tnc2addrlen,
 				& is_ui, &ui_pid );
 		tbuf[t2l] = 0;
-		if (debug) {
-			printf(" out-hdr: '%s' data='",tbuf);
+		//if (debug) {
+			aprxlog(" out-hdr: '%s' ",tbuf);
 			(void)fwrite(pb->ax25data+2, pb->ax25datalen-2,  // without Control+PID
 					1, stdout);
-			printf("'\n");
-		}
+		//	printf("'\n");
+		//}
 
 #ifndef DISABLE_IGATE
 		// Insert into history database - track every packet
@@ -1552,7 +1553,8 @@ void digipeater_receive( struct digipeater_source *src,
 		//    If the dupe detector on this packet has reached
 		//    count > 1, drop it.
 
-		int jittery = src->viscous_delay > 0 ? random() % 1 + src->viscous_delay - 1 : 0;
+		int jittery = src->viscous_delay > 0 ? random() % 2 + src->viscous_delay : 0;
+		aprxlog("jittery = %d", jittery);
 		dupe_record_t *dupe = dupecheck_pbuf( src->parent->dupechecker,
 				pb, jittery);
 		if (dupe == NULL) {  // Oops.. allocation error!
@@ -1673,7 +1675,8 @@ void digipeater_receive( struct digipeater_source *src,
 		} 
 	}
 	// Send directly to backend
-	if (debug>1) printf(".. direct to processing\n");
+	// if (debug>1) 
+	aprxlog(".. direct to processing");
 	digipeater_receive_backend(src, pb);
 }
 
